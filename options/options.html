@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Media Saver – Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>X Media Saver</h1>
+      <p>Configure how media is downloaded from X/Twitter.</p>
+    </header>
+
+    <section>
+      <h2>General</h2>
+
+      <label class="row">
+        <span>Enable downloads</span>
+        <input type="checkbox" id="enabled">
+      </label>
+
+      <label class="row">
+        <span>Show save dialog for each download</span>
+        <input type="checkbox" id="saveAs">
+      </label>
+      <p class="hint">Leave unchecked for instant downloads without confirmation.</p>
+
+      <label class="row">
+        <span>Prefer original image quality</span>
+        <input type="checkbox" id="preferOriginalQuality">
+      </label>
+    </section>
+
+    <section>
+      <h2>Save locations</h2>
+      <p class="hint">
+        Folders are created inside your Firefox Downloads directory.
+        Example: <code>X-Media/images</code> saves to <code>Downloads/X-Media/images/</code>.
+      </p>
+
+      <label>
+        <span>Images folder</span>
+        <input type="text" id="imageFolder" placeholder="X-Media/images">
+      </label>
+
+      <label>
+        <span>Videos folder</span>
+        <input type="text" id="videoFolder" placeholder="X-Media/videos">
+      </label>
+
+      <label>
+        <span>GIFs folder</span>
+        <input type="text" id="gifFolder" placeholder="X-Media/gifs">
+      </label>
+    </section>
+
+    <section>
+      <h2>Filename template</h2>
+      <label>
+        <span>Template</span>
+        <input type="text" id="filenameTemplate" placeholder="{author}_{tweetId}_{index}">
+      </label>
+      <p class="hint">
+        Available variables: <code>{author}</code>, <code>{tweetId}</code>, <code>{index}</code>
+      </p>
+    </section>
+
+    <section>
+      <h2>Button placement</h2>
+
+      <label class="row">
+        <span>Download button position</span>
+        <select id="buttonPosition">
+          <option value="left">Left (before Reply)</option>
+          <option value="right">Right (after Share)</option>
+        </select>
+      </label>
+
+    </section>
+
+    <section>
+      <h2>Fur Affinity</h2>
+      <p class="hint">
+        Drag the floating download icon onto a submission image or gallery thumbnail.
+        The icon snaps back to the side after each use.
+      </p>
+
+      <label class="row">
+        <span>Show drag icon on Fur Affinity</span>
+        <input type="checkbox" id="faFloatingIcon">
+      </label>
+
+      <label>
+        <span>Fur Affinity folder</span>
+        <input type="text" id="faImageFolder" placeholder="FurAffinity">
+      </label>
+
+      <label>
+        <span>Fur Affinity filename template</span>
+        <input type="text" id="faFilenameTemplate" placeholder="{artist}_{id}">
+      </label>
+      <p class="hint">
+        Variables: <code>{artist}</code>, <code>{id}</code>, <code>{title}</code>
+      </p>
+    </section>
+
+    <footer>
+      <button id="save" type="button">Save settings</button>
+      <span id="status" role="status"></span>
+    </footer>
+  </main>
+
+  <script src="options.js"></script>
+</body>
+</html>

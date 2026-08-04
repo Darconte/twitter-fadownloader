@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "X Media Saver",
+  "version": "1.2.3",
+  "description": "Download media from X/Twitter and Fur Affinity — one-click or drag-to-save.",
+  "permissions": ["downloads", "storage"],
+  "host_permissions": [
+    "*://twitter.com/*",
+    "*://x.com/*",
+    "*://pbs.twimg.com/*",
+    "*://video.twimg.com/*",
+    "*://cdn.syndication.twimg.com/*",
+    "*://www.furaffinity.net/*",
+    "*://furaffinity.net/*",
+    "*://d.furaffinity.net/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://twitter.com/*", "*://x.com/*"],
+      "js": ["content/interceptor.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://twitter.com/*", "*://x.com/*"],
+      "js": [
+        "content/twitter-inject.js",
+        "content/gifenc.js",
+        "content/content.js",
+        "content/gif-converter.js"
+      ],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://www.furaffinity.net/*", "*://furaffinity.net/*"],
+      "js": ["content/floating-drag.js", "content/furaffinity.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "x-media-saver@local.dev",
+      "strict_min_version": "109.0"
+    }
+  },
+  "icons": {
+    "48": "icons/icon-48.svg",
+    "96": "icons/icon-96.svg"
+  },
+  "action": {
+    "default_title": "X Media Saver",
+    "default_icon": {
+      "48": "icons/icon-48.svg",
+      "96": "icons/icon-96.svg"
+    }
+  }
+}

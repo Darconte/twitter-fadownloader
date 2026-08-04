@@ -1,0 +1,113 @@
+.xms-download-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  margin: 0 2px 0 0;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: rgb(113, 118, 123);
+  cursor: pointer;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font: inherit;
+  line-height: 0;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.xms-download-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18.75px;
+  height: 18.75px;
+}
+
+.xms-download-btn svg {
+  width: 18.75px;
+  height: 18.75px;
+  display: block;
+}
+
+.xms-download-btn:hover {
+  color: rgb(29, 155, 240);
+  background-color: rgba(29, 155, 240, 0.1);
+}
+
+.xms-download-btn:hover svg path {
+  fill: rgb(29, 155, 240);
+}
+
+.xms-download-btn.xms-loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.xms-download-btn.xms-ok {
+  color: rgb(0, 186, 124);
+}
+
+.xms-download-btn.xms-err {
+  color: rgb(244, 33, 46);
+}
+
+.xms-float-icon {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border-radius: 50%;
+  background: rgb(29, 155, 240);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.xms-float-icon:hover {
+  background: rgb(26, 140, 216);
+  transform: scale(1.05);
+}
+
+.xms-float-icon.xms-dragging {
+  cursor: grabbing;
+  transform: scale(1.08);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.xms-float-icon svg {
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+.xms-float-icon.xms-loading {
+  opacity: 0.75;
+}
+
+.xms-float-icon.xms-ok {
+  background: rgb(0, 186, 124);
+}
+
+.xms-float-icon.xms-err {
+  background: rgb(244, 33, 46);
+}
+
+@media (prefers-color-scheme: light) {
+  .xms-download-btn {
+    color: rgb(83, 100, 113);
+  }
+}
