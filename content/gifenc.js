@@ -1,18 +1,168 @@
-/* gifenc 1.0.3 – MIT, bundled for extension use */
+/* content/gifenc.js - Self-contained GIF encoder */
 var XMSGifenc = (function () {
-  var X={signature:"GIF",version:"89a",trailer:59,extensionIntroducer:33,applicationExtensionLabel:255,graphicControlExtensionLabel:249,imageSeparator:44,signatureSize:3,versionSize:3,globalColorTableFlagMask:128,colorResolutionMask:112,sortFlagMask:8,globalColorTableSizeMask:7,applicationExtensionLabel:255,applicationIdentifierSize:8,applicationAuthCodeSize:3,disposalMethodMask:28,userInputFlagMask:2,transparentColorFlagMask:1,localColorTableFlagMask:128,interlaceFlagMask:64,idSortFlagMask:32,localColorTableSizeMask:7};
-  function F(t){let e=0,s=new Uint8Array(t||256);return{get buffer(){return s.buffer},reset(){e=0},bytesView(){return s.subarray(0,e)},writeByte(r){n(e+1),s[e]=r,e++},writeBytesView(r,o,i){n(e+i),s.set(r.subarray(o,o+i),e),e+=i}};function n(r){if(s.length>=r)return;let o=Math.max(r,s.length*2);let i=s;s=new Uint8Array(o),e>0&&s.set(i.subarray(0,e),0)}}
-  var O=12,J=5003,lt=[0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535];
-  function at(t,e,s,n,r,o,i,c){let x=i.length,a=Math.max(2,n);o.fill(0),c.fill(0),i.fill(-1);let l=0,f=0,g=a+1,h=g,b=!1,w=h,_=(1<<w)-1,u=1<<g-1,k=u+1,B=u+2,p=0,A=s[0],z=0;for(let y=x;y<65536;y*=2)++z;z=8-z,r.writeByte(a),I(u);let d=s.length;for(let y=1;y<d;y++){let m=s[y],v=(m<<O)+A,M=m<<z^A;if(i[M]===v){A=c[M];continue}let V=M===0?1:x-M;for(;i[M]>=0;)if(M-=V,M<0&&(M+=x),i[M]===v){A=c[M];continue}I(A),A=m,B<1<<O?(c[M]=B++,i[M]=v):(i.fill(-1),B=u+2,b=!0,I(u))}return I(A),I(k),r.writeByte(0),r.bytesView();function I(y){for(l&=lt[f],f>0?l|=y<<f:l=y,f+=w;f>=8;)o[p++]=l&255,p>=254&&(r.writeByte(p),r.writeBytesView(o,0,p),p=0),l>>=8,f-=8;if((B>_||b)&&(b?(w=h,_=(1<<w)-1,b=!1):(++w,_=w===O?1<<w:(1<<w)-1)),y==k){for(;f>0;)o[p++]=l&255,p>=254&&(r.writeByte(p),r.writeBytesView(o,0,p),p=0),l>>=8,f-=8;p>0&&(r.writeByte(p),r.writeBytesView(o,0,p),p=0)}}}
-  function D(t,e,s){return t<<8&63488|e<<2&992|s>>3}
-  function j(t,e,s){return t>>4|e&240|(s&240)<<4}
-  function R(t,e,s){return t<e?e:t>s?s:t}
-  function T(t){return t*t}
-  function tt(t,e){var n=0,r=1e100;let o=t[e],i=o.cnt,c=o.rc,x=o.gc,a=o.bc;for(var f=o.fw;f!=0;f=t[f].fw){let h=t[f],b=h.cnt,w=i*b/(i+b);if(!(w>=r)){var g=0;g+=w*T(h.rc-c),g>=r||(g+=w*T(h.gc-x),g>=r||(g+=w*T(h.bc-a),g>=r||(r=g,n=f)))}}o.err=r,o.nn=n}
-  function Q(){return{rc:0,gc:0,bc:0,cnt:0,nn:0,fw:0,bk:0,tm:0,mtm:0,err:0}}
-  function ut(t){let s=65536,n={},r=t.length;for(let o=0;o<r;++o){let i=t[o],c=i>>16&255,x=i>>8&255,a=i&255,l=D(a,x,c),f=l in n?n[l]:n[l]=Q();f.rc+=a,f.gc+=x,f.bc+=c,f.cnt++}return n}
-  function H(t,e){if(!t||!t.buffer)throw new Error('quantize() expected RGBA data');let x=new Uint32Array(t.buffer),f=ut(x),g=Object.keys(f).length,h=g-1,b=new Uint32Array(g+1),w=0;for(let u=0;u<g;++u){let C=f[u];if(C!=null){let _=1/C.cnt;C.rc*=_,C.gc*=_,C.bc*=_,f[w++]=C}}for(let u=0;u<w-1;++u)f[u].fw=u+1,f[u+1].bk=u;let z=w-e;for(let u=0;u<z;){let d,I=b[1],y=f[I];for(;;){if(y.tm>=y.mtm&&f[y.nn].tm<=y.tm)break;y.mtm==h?I=b[1]=b[b[0]--]:tt(f,I);let A=f[I].err;for(d=1;(p=d+d)<=b[0]&&(p<b[0]&&f[b[p]].err>f[b[p+1]].err&&p++,!(A<=f[k=b[p]].err));d=p)b[d]=k;b[d]=I;break}let m=f[y.nn],v=y.cnt,M=m.cnt,_=1/(v+M);y.rc=_*(v*y.rc+M*m.rc),y.gc=_*(v*y.gc+M*m.gc),y.bc=_*(v*y.bc+M*m.bc),y.cnt+=m.cnt,y.mtm=++u,f[m.bk].fw=m.fw,f[m.fw].bk=m.bk,m.mtm=h}let V=[];for(let u=0;;++u){let L=R(Math.round(f[u].rc),0,255),C=R(Math.round(f[u].gc),0,255),Y=R(Math.round(f[u].bc),0,255);V.push([L,C,Y]);if((u=f[u].fw)==0)break}return V}
-  function nt(t,e){let n=new Uint32Array(t.buffer),r=n.length,o=65536,i=new Uint8Array(r),c={};for(let l=0;l<r;l++){let f=n[l],g=f>>16&255,h=f>>8&255,b=f&255,w=D(b,h,g),_=w in c?c[w]:c[w]=bt(b,h,g,e);i[l]=_}return i;function bt(t,e,s,n){let r=0,o=1e100;for(let i=0;i<n.length;i++){let c=n[i],x=c[0],a=(x-t)**2;if(a>o)continue;let l=c[1];a+=(l-e)**2;if(a>o)continue;let f=c[2];a+=(f-s)**2;if(a<o){o=a,r=i}}return r}}
-  function ct(t){let n=F(t?.initialCapacity||4096),r=!1,o=new Uint8Array(256),i=new Int32Array(5003),c=new Int32Array(5003);return{reset(){n.reset(),r=!1},finish(){n.writeByte(59)},bytesView(){return n.bytesView()},writeFrame(l,f,g,h={}){let A=!r;if(A){if(!h.palette)throw new Error('First frame needs palette');pt(n,f,g,h.palette,8),it(n,h.palette),h.repeat>=0&&dt(n,h.repeat),r=!0}wt(n,h.dispose??-1,Math.round((h.delay||0)/10),h.transparent,h.transparentIndex);let d=Boolean(h.palette)&&!A;ht(n,f,g,d?h.palette:null),d&&it(n,h.palette),at(l,f,g,8,n,o,i,c)}}};function wt(t,e,s,n,r){t.writeByte(33),t.writeByte(249),t.writeByte(4),r<0&&(r=0,n=!1);let i=n?2:0;e>=0&&(i=e&7),i<<=2,t.writeByte(i),S(t,s),t.writeByte(r||0),t.writeByte(0)}function pt(t,e,s,p,r){S(t,e),S(t,s),t.writeBytes([128|r-1<<4|7,0,0])}function dt(t,e){t.writeByte(33),t.writeByte(255),t.writeByte(11),ft(t,'NETSCAPE2.0'),t.writeByte(3),t.writeByte(1),S(t,e),t.writeByte(0)}function it(t,e){let s=1<<Math.max(Math.ceil(Math.log2(e.length)),1);for(let n=0;n<s;n++){let r=n<e.length?e[n]:[0,0,0];t.writeByte(r[0]),t.writeByte(r[1]),t.writeByte(r[2])}}function ht(t,e,s,p){t.writeByte(44),S(t,0),S(t,0),S(t,e),S(t,s),p?t.writeByte(128|Math.max(Math.ceil(Math.log2(p.length)),1)-1):t.writeByte(0)}function S(t,e){t.writeByte(e&255),t.writeByte(e>>8&255)}function ft(t,e){for(let s=0;s<e.length;s++)t.writeByte(e.charCodeAt(s))}}
-  return { GIFEncoder: ct, quantize: H, applyPalette: nt };
+
+  function createGIF(width, height, frames, delayMs) {
+    // Collect all RGBA frames into GIF byte array
+    const delay = Math.round(delayMs / 10);
+    const buffer = [];
+
+    function writeByte(b) { buffer.push(b & 0xff); }
+    function writeShort(s) { writeByte(s); writeByte(s >> 8); }
+    function writeString(str) { for (let i = 0; i < str.length; i++) writeByte(str.charCodeAt(i)); }
+
+    // Header & Logical Screen Descriptor
+    writeString("GIF89a");
+    writeShort(width);
+    writeShort(height);
+    writeByte(0x70); // 256 colors, no global palette (local per frame)
+    writeByte(0);    // Background color
+    writeByte(0);    // Pixel aspect ratio
+
+    // Loop Extension (NETSCAPE2.0)
+    writeByte(0x21); writeByte(0xff); writeByte(11);
+    writeString("NETSCAPE2.0");
+    writeByte(3); writeByte(1); writeShort(0); writeByte(0);
+
+    for (let f = 0; f < frames.length; f++) {
+      const rgba = frames[f];
+      
+      // Build Palette (Simple 256-color median/box quantization)
+      const { palette, indexed } = buildPaletteAndIndices(rgba, width * height);
+
+      // Graphic Control Extension
+      writeByte(0x21); writeByte(0xf9); writeByte(4);
+      writeByte(0x04); // Disposal: Restore to background
+      writeShort(delay);
+      writeByte(0); // No transparency index
+      writeByte(0);
+
+      // Image Descriptor
+      writeByte(0x2c);
+      writeShort(0); writeShort(0); // X, Y
+      writeShort(width); writeShort(height); // W, H
+      writeByte(0x87); // Local color table, 256 colors
+
+      // Local Color Table (256 * 3 bytes)
+      for (let i = 0; i < 256; i++) {
+        if (i < palette.length) {
+          writeByte(palette[i][0]);
+          writeByte(palette[i][1]);
+          writeByte(palette[i][2]);
+        } else {
+          writeByte(0); writeByte(0); writeByte(0);
+        }
+      }
+
+      // LZW Image Data
+      encodeLZW(indexed, 8, writeByte);
+    }
+
+    writeByte(0x3b); // Trailer
+    return new Uint8Array(buffer);
+  }
+
+  function buildPaletteAndIndices(rgba, pixelCount) {
+    // Ensure opaque backgrounds don't turn black from alpha mismatch
+    const palette = [];
+    const colorMap = new Map();
+    const indexed = new Uint8Array(pixelCount);
+
+    // Step 1: Sample colors with 5-bit quantization to fit into 256 palette entries
+    for (let i = 0; i < pixelCount; i++) {
+      const r = rgba[i * 4];
+      const g = rgba[i * 4 + 1];
+      const b = rgba[i * 4 + 2];
+      const a = rgba[i * 4 + 3];
+
+      // Blend over white background if frame has transparency
+      const finalR = a < 128 ? 255 : r;
+      const finalG = a < 128 ? 255 : g;
+      const finalB = a < 128 ? 255 : b;
+
+      const key = ((finalR >> 3) << 10) | ((finalG >> 3) << 5) | (finalB >> 3);
+
+      if (!colorMap.has(key)) {
+        if (palette.length < 256) {
+          colorMap.set(key, palette.length);
+          palette.push([finalR, finalG, finalB]);
+        } else {
+          // Palette full, map to closest existing
+          colorMap.set(key, 0); 
+        }
+      }
+      indexed[i] = colorMap.get(key);
+    }
+
+    while (palette.length < 2) palette.push([0, 0, 0]);
+    return { palette, indexed };
+  }
+
+  function encodeLZW(pixels, minCodeSize, writeByte) {
+    writeByte(minCodeSize);
+    
+    const clearCode = 1 << minCodeSize;
+    const eofCode = clearCode + 1;
+    let codeSize = minCodeSize + 1;
+    let nextCode = clearCode + 2;
+    
+    let table = new Map();
+    let curBuf = [];
+    
+    function writeBits(code) {
+      for (let b = 0; b < codeSize; b++) {
+        bitBuf |= ((code >> b) & 1) << bitCount;
+        bitCount++;
+        if (bitCount === 8) {
+          outBuf.push(bitBuf);
+          bitBuf = 0;
+          bitCount = 0;
+          if (outBuf.length === 254) {
+            writeByte(outBuf.length);
+            for (let i = 0; i < outBuf.length; i++) writeByte(outBuf[i]);
+            outBuf = [];
+          }
+        }
+      }
+    }
+
+    let bitBuf = 0, bitCount = 0, outBuf = [];
+    
+    writeBits(clearCode);
+
+    let prefix = pixels[0];
+    for (let i = 1; i < pixels.length; i++) {
+      const k = pixels[i];
+      const key = (prefix << 16) | k;
+
+      if (table.has(key)) {
+        prefix = table.get(key);
+      } else {
+        writeBits(prefix);
+        if (nextCode < 4096) {
+          table.set(key, nextCode++);
+          if (nextCode === (1 << codeSize) + 1 && codeSize < 12) {
+            codeSize++;
+          }
+        } else {
+          writeBits(clearCode);
+          table.clear();
+          codeSize = minCodeSize + 1;
+          nextCode = clearCode + 2;
+        }
+        prefix = k;
+      }
+    }
+
+    writeBits(prefix);
+    writeBits(eofCode);
+
+    if (bitCount > 0) outBuf.push(bitBuf);
+    if (outBuf.length > 0) {
+      writeByte(outBuf.length);
+      for (let i = 0; i < outBuf.length; i++) writeByte(outBuf[i]);
+    }
+    writeByte(0); // Sub-block terminator
+  }
+
+  return { createGIF };
 })();

@@ -2,67 +2,20 @@
   'use strict';
 
   const BTN_CLASS = 'xms-download-btn';
-  const ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>`;
+  // Use explicit inline styles on elements instead of inline event handlers to satisfy CSP
+  const ICON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true" style="width: 1.25em; height: 1.25em; pointer-events: none;"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>`;
 
   let enabled = true;
 
   function tweetHasMedia(article) {
-    if (article.querySelector('[data-testid="tweetPhoto"]')) return true;
-    if (article.querySelector('[data-testid="videoPlayer"]')) return true;
-    if (article.querySelector('[data-testid="videoComponent"]')) return true;
-    if (article.querySelector('[data-testid="card.layoutLarge.media"]')) return true;
-    if (article.querySelector('video')) return true;
-
-    for (const img of article.querySelectorAll('img[src*="twimg.com"]')) {
-      const src = img.currentSrc || img.src || '';
-      if (src.includes('profile_images') || src.includes('/emoji/')) continue;
-      if (src.includes('/media/') || src.includes('pbs.twimg.com')) return true;
+    if (article.querySelector('[data-testid="tweetPhoto"], [data-testid="videoPlayer"], [data-testid="videoComponent"], [data-testid="card.layoutLarge.media"]')) {
+      return true;
     }
-
-    return false;
+    const imgs = article.querySelectorAll('img[src*="pbs.twimg.com/media/"]');
+    return imgs.length > 0;
   }
 
-  function findReplyButton(article) {
-    return (
-      article.querySelector('[data-testid="reply"]') ||
-      article.querySelector('button[aria-label*="Reply" i]') ||
-      article.querySelector('a[aria-label*="Reply" i]')
-    );
-  }
-
-  function findActionAnchor(article, reply) {
-    for (const group of article.querySelectorAll('[role="group"]')) {
-      if (!group.contains(reply)) continue;
-      if (
-        !group.querySelector('[data-testid="like"], [data-testid="unlike"]') ||
-        !group.querySelector('[data-testid="retweet"], [data-testid="unretweet"]')
-      ) {
-        continue;
-      }
-
-      let anchor = reply;
-      while (anchor.parentElement && anchor.parentElement !== group) {
-        anchor = anchor.parentElement;
-      }
-      return { toolbar: group, anchor };
-    }
-
-    let node = reply;
-    while (node.parentElement && node.parentElement !== article) {
-      const parent = node.parentElement;
-      const actions = parent.querySelectorAll(
-        '[data-testid="reply"], [data-testid="retweet"], [data-testid="like"], [data-testid="unlike"]'
-      );
-      if (actions.length >= 2) {
-        return { toolbar: parent, anchor: node };
-      }
-      node = parent;
-    }
-
-    return { toolbar: reply.parentElement, anchor: reply };
-  }
-
-  function createButton(reply) {
+  function createButton(replyBtn) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = BTN_CLASS;
@@ -71,14 +24,14 @@
     button.setAttribute('data-testid', 'xms-download');
 
     const iconWrap = document.createElement('div');
-    iconWrap.setAttribute('dir', 'ltr');
     iconWrap.className = 'xms-download-btn-icon';
+    iconWrap.style.cssText = 'display: flex; align-items: center; justify-content: center; cursor: pointer;';
     iconWrap.innerHTML = ICON_SVG;
     button.appendChild(iconWrap);
 
-    if (reply) {
-      for (const name of reply.classList) {
-        if (name.startsWith('css-')) button.classList.add(name);
+    if (replyBtn) {
+      for (const className of replyBtn.classList) {
+        if (className.startsWith('css-')) button.classList.add(className);
       }
     }
 
@@ -88,18 +41,27 @@
   function injectTweetButtons() {
     if (!enabled) return;
 
-    for (const article of document.querySelectorAll('article[data-testid="tweet"]')) {
+    const articles = document.querySelectorAll('article[data-testid="tweet"]');
+
+    for (const article of articles) {
       if (article.querySelector(`.${BTN_CLASS}`)) continue;
       if (!tweetHasMedia(article)) continue;
 
-      const reply = findReplyButton(article);
-      if (!reply) continue;
+      // Select action bar container cleanly
+      const toolbar = article.querySelector('div[role="group"]');
+      if (!toolbar) continue;
 
-      const placement = findActionAnchor(article, reply);
-      if (!placement?.toolbar || !placement.anchor) continue;
+      const replyBtn = toolbar.querySelector('[data-testid="reply"]') || toolbar.children[0];
+      if (!replyBtn) continue;
 
-      const button = createButton(reply);
-      placement.toolbar.insertBefore(button, placement.anchor);
+      const button = createButton(replyBtn);
+
+      // Safe insertion without breaking flex alignment
+      if (replyBtn.nextSibling) {
+        toolbar.insertBefore(button, replyBtn.nextSibling);
+      } else {
+        toolbar.appendChild(button);
+      }
     }
   }
 
@@ -140,14 +102,11 @@
   function start() {
     loadEnabledSetting();
     injectTweetButtons();
+    
     new MutationObserver(scheduleInject).observe(document.body, {
       childList: true,
       subtree: true
     });
-    window.setInterval(injectTweetButtons, 1500);
-    for (const delay of [500, 1500, 4000]) {
-      window.setTimeout(injectTweetButtons, delay);
-    }
   }
 
   if (document.body) start();

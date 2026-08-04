@@ -204,36 +204,33 @@
     return items;
   }
 
-  function blobToDataUrl(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  }
-
-  async function mp4UrlToGifDataUrl(mp4Url) {
+  async function mp4UrlToGifBuffer(mp4Url) {
     if (typeof window.XMS_convertMp4ToGif !== 'function') {
       throw new Error('GIF converter not loaded');
     }
+    
     const fetched = await browser.runtime.sendMessage({
       type: 'fetchBlob',
       url: mp4Url
     });
 
-    if (!fetched?.ok || !fetched.buffer) {
-      throw new Error(fetched?.error || 'Could not fetch GIF video');
+    if (!fetched?.ok) {
+      throw new Error(`Fetch failed: ${fetched?.error || 'Unknown error fetching MP4 video'}`);
     }
 
-    const blob = new Blob([fetched.buffer], {
+    const rawBuffer = fetched.buffer instanceof ArrayBuffer 
+      ? fetched.buffer 
+      : new Uint8Array(fetched.buffer).buffer;
+
+    const blob = new Blob([rawBuffer], {
       type: fetched.contentType || 'video/mp4'
     });
     const blobUrl = URL.createObjectURL(blob);
 
     try {
       const gifBlob = await window.XMS_convertMp4ToGif(blobUrl);
-      return blobToDataUrl(gifBlob);
+      const arrayBuffer = await gifBlob.arrayBuffer();
+      return Array.from(new Uint8Array(arrayBuffer));
     } finally {
       URL.revokeObjectURL(blobUrl);
     }
@@ -253,16 +250,19 @@
       const item = items[index];
       let url = item.url;
       let ext = item.ext;
+      let buffer = null;
 
       if (isTwitterGif(item)) {
-        url = await mp4UrlToGifDataUrl(url);
+        buffer = await mp4UrlToGifBuffer(url);
         ext = 'gif';
+        url = null;
       }
 
       const response = await browser.runtime.sendMessage({
         type: 'download',
         payload: {
           url,
+          buffer,
           mediaType: item.mediaType,
           vars: {
             author: item.author || 'unknown',

@@ -15,7 +15,8 @@
     "*://d.furaffinity.net/*"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background.js"],
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -27,10 +28,10 @@
     {
       "matches": ["*://twitter.com/*", "*://x.com/*"],
       "js": [
-        "content/twitter-inject.js",
         "content/gifenc.js",
+        "content/gif-converter.js",
         "content/content.js",
-        "content/gif-converter.js"
+        "content/twitter-inject.js"
       ],
       "css": ["content/content.css"],
       "run_at": "document_idle"
